@@ -7,17 +7,13 @@
       </div>
 
       <nav>
-        <!-- Show Login if not logged in -->
         <router-link v-if="!isLoggedIn" to="/login">[ Login ]</router-link> |
         <router-link v-if="!isLoggedIn" to="/signup">[ Signup ]</router-link> |
 
-        <!-- Show Logout if logged in -->
-        <router-link v-if="isLoggedIn" to="/logout">[ Logout ]</router-link> |
+        <router-link v-if="isLoggedIn" @click="logout" to="#">[ Logout ]</router-link> |
 
-        <!-- Show Make a Booking if logged in -->
         <router-link v-if="isLoggedIn" to="/booking">[ Make a Booking ]</router-link> |
 
-        <!-- Show Track Booking if logged in -->
         <router-link v-if="isLoggedIn" to="/tracking">[ Track Booking ]</router-link>
       </nav>
     </header>
@@ -31,16 +27,20 @@ export default {
   name: 'App',
   data() {
     return {
-      // Check if the user is logged in
-      isLoggedIn: localStorage.getItem("access_token") !== null,
-      userRole: localStorage.getItem("user_role"), // 'rider' or other roles
+      isLoggedIn: false, 
     };
   },
-  watch: {
-    isLoggedIn(newVal) {
-      if (!newVal) {
-        this.userRole = null; // Reset role if the user is logged out
-      }
+  created() {
+    this.checkLoginStatus();
+  },
+  methods: {
+    logout() {
+      localStorage.removeItem("access_token");
+      this.isLoggedIn = false; 
+      this.$router.push('/login');
+    },
+    checkLoginStatus() {
+      this.isLoggedIn = localStorage.getItem("access_token") !== null;
     },
   },
 };
@@ -53,7 +53,6 @@ export default {
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
   color: #2c3e50;
-  /* margin-top: 60px; */
   background-color: black;
   height: 100vh;
 }

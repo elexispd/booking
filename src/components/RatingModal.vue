@@ -22,32 +22,57 @@
 </template>
 
 <script>
-export default {
-  data() {
-    return {
-      isOpen: false,
-      bookingId: null,
-      rating: 0,
-      feedback: '',
-    };
-  },
-  methods: {
-    openRatingModal(bookingId) {
-      // Open modal and set booking ID
-      this.bookingId = bookingId;
-      this.isOpen = true;
+  import axios from 'axios';
+
+  export default {
+    data() {
+      return {
+        isOpen: false,
+        bookingId: null,
+        rating: 0,
+        feedback: '',
+      };
     },
-    closeRatingModal() {
-      this.isOpen = false;
+    methods: {
+      openRatingModal(bookingId) {
+        // Open modal and set booking ID
+        this.bookingId = bookingId;
+        this.isOpen = true;
+      },
+      closeRatingModal() {
+        this.isOpen = false;
+      },
+      rate(star) {
+        this.rating = star;
+      },
+      async submitRating() {
+        const payload = {
+          booking_id: this.bookingId,
+          rating: this.rating,
+          comment: this.feedback,
+        };
+
+        try {
+          const apiUrl = 'https://booking.fikkton.com.ng/api/ratings';
+          const token = localStorage.getItem("access_token");
+          if (!token) throw new Error("You need to login first.");
+
+          await axios.post(apiUrl, payload, {
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+          });
+          alert('Rating submitted successfully!');
+          this.$emit('rating-submitted', this.bookingId); 
+          this.closeRatingModal();
+        } catch (error) {
+          const errorMsg = error.response?.data?.message || 'Error submitting rating.';
+          alert(`Error: ${errorMsg}`);
+        }
+      },
     },
-    rate(star) {
-      this.rating = star;
-    },
-    submitRating() {
-      console.log('Rating Submitted for Booking ID:', this.bookingId, 'Rating:', this.rating, 'Feedback:', this.feedback);
-    },
-  },
-};
+  };
 </script>
 
 <style scoped>

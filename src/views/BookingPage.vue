@@ -22,20 +22,21 @@
       <ul>
         <li v-for="booking in bookings" :key="booking.id">
           {{ booking.item }} - {{ booking.pickup_location }} to {{ booking.dropoff_location }} on {{ booking.date }}
-          <button v-if="booking.rider_id" @click="openRatingModal(booking.id)">Rate Booking</button>
-          <button v-if="booking.rider_id === null">Pending</button>
+          <button v-if="booking.status === 'accepted'" @click="openRatingModal(booking.id)">Rate Booking</button>
+          <button class="completed" v-if="booking.status === 'completed'">Completed</button>
+          <button class="pending" v-if="booking.rider_id === null">Pending</button>
         </li>
       </ul>
     </div>
 
     <!-- Rating Modal -->
-    <RatingModal ref="ratingModal" />
+    <RatingModal ref="ratingModal" @rating-submitted="handleRatingSubmitted" />
   </div>
 </template>
 
 <script>
 import axios from "axios";
-import RatingModal from "@/components/RatingModal.vue";  // Import the modal component
+import RatingModal from "@/components/RatingModal.vue";
 
 export default {
   components: {
@@ -101,8 +102,13 @@ export default {
       this.popupVisible = false;
     },
     openRatingModal(bookingId) {
-      // Using $refs to call the openRatingModal method from the modal component
       this.$refs.ratingModal.openRatingModal(bookingId);
+    },
+    handleRatingSubmitted(bookingId) {
+      const booking = this.bookings.find(b => b.id === bookingId);
+      if (booking) {
+        booking.status = 'completed';
+      }
     },
     resetForm() {
       this.item = "";
@@ -115,6 +121,7 @@ export default {
   },
 };
 </script>
+
 
 <style scoped>
 .form-container {
@@ -150,6 +157,30 @@ button {
 
 button:hover {
   background-color: #0056b3;
+}
+.pending {
+  width: 100%;
+  padding: 10px;
+  background-color: #eb6b16;
+  color: white;
+  border: none;
+  border-radius: 4px;
+}
+
+.pending:hover {
+  background-color: #5e3807;
+}
+.completed {
+  width: 100%;
+  padding: 10px;
+  background-color: #1dc62e;
+  color: white;
+  border: none;
+  border-radius: 4px;
+}
+
+.completed:hover {
+  background-color: #164907;
 }
 
 .popup {
